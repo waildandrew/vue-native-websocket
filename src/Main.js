@@ -4,7 +4,10 @@ import Emitter from './Emitter'
 export default {
 
   install (Vue, connection, opts = {}) {
-    if (!connection) { throw new Error('[vue-native-socket] cannot locate connection') }
+    if (!connection && !opts.connectManually) { throw new Error('[vue-native-socket] cannot locate connection') }
+    if (opts.getUrlCallbacFunc && typeof opts.getUrlCallbacFunc !== 'function') {
+      throw new Error('[vue-native-socket] "getUrlCallbacFunc" should be a function')
+    }
 
     let observer = null
 

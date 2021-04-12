@@ -11,7 +11,8 @@ export default class {
 
     this.connectionUrl = connectionUrl
     this.opts = opts
-
+    this.getUrlCallbacFunc = this.opts.getUrlCallbacFunc || false
+    this.namespace = this.opts.namespace || ''
     this.reconnection = this.opts.reconnection || false
     this.reconnectionAttempts = this.opts.reconnectionAttempts || Infinity
     this.reconnectionDelay = this.opts.reconnectionDelay || 1000
@@ -29,7 +30,9 @@ export default class {
 
   connect (connectionUrl, opts = {}) {
     let protocol = opts.protocol || ''
-    this.WebSocket = opts.WebSocket || (protocol === '' ? new WebSocket(connectionUrl) : new WebSocket(connectionUrl, protocol))
+    let url = this.getUrlCallbacFunc() || connectionUrl
+
+    this.WebSocket = opts.WebSocket || (protocol === '' ? new WebSocket(url) : new WebSocket(url, protocol))
     if (this.format === 'json') {
       if (!('sendObj' in this.WebSocket)) {
         this.WebSocket.sendObj = (obj) => this.WebSocket.send(JSON.stringify(obj))
@@ -96,6 +99,10 @@ export default class {
     }
     if (this.mutations) {
       target = this.mutations[target] || target
+    }
+
+    if (this.namespace) {
+      target = [this.namespace, target].filter((e) => !!e).join('/')
     }
     this.store[method](target, msg)
   }
